@@ -1,0 +1,26 @@
+name: "Get Vercel deployment"
+description: "Gets the URL of the preview deployment on Vercel for the current commit"
+inputs:
+  vercel-token:
+    description: "A token that allows access to the Vercel-API"
+    required: true
+  project-id:
+    description: "The identifier for your Vercel project"
+    required: true
+  team-id:
+    description: "The identifier for your Vercel team (leave blank for personal projects)"
+    required: false
+  search-retries:
+    description: "The number of times the action should try to find a deployment related to the current commit (5 seconds between searches)"
+    required: false
+    default: 3
+  ready-retries:
+    description: "The number of times the action should check if the latest deployment related to the current commit is ready (30 seconds between checks)"
+    required: false
+    default: 10
+outputs:
+  url:
+    description: "The URL of the vercel preview deployment"
+runs:
+  using: "node12"
+  main: "dist/index.js"
