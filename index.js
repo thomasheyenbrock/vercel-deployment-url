@@ -51,7 +51,11 @@ async function main() {
           deployments.length > 1 ? "s" : ""
         }, using the latest one.`
       );
-      return api(`/v11/now/deployments/${deployments[0].uid}`);
+      return api(
+        `/v11/now/deployments/${deployments[0].uid}${
+          teamId ? `?teamId=${teamId}&` : ""
+        }`
+      );
     }
     console.log(
       `No deployments found yet, waiting for ${DEPLOYMENT_SEARCH_INTERVAL} seconds before trying again (${retries} retries remaining)`
@@ -80,7 +84,9 @@ async function main() {
         );
         await wait(DEPLOYMENT_READY_INTERVAL);
         const updatedDeployment = await api(
-          `/v11/now/deployments/${deployment.id}`
+          `/v11/now/deployments/${deployment.id}${
+            teamId ? `?teamId=${teamId}&` : ""
+          }`
         );
         return waitForDeploymentToBeReady(updatedDeployment, retries - 1);
     }
