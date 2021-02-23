@@ -1,4 +1,5 @@
 const core = require("@actions/core");
+const { Octokit } = require("@octokit/rest");
 const fetch = require("node-fetch");
 
 const DEPLOYMENT_SEARCH_INTERVAL = 5;
@@ -9,11 +10,15 @@ async function wait(s) {
 }
 
 async function main() {
+  const githubToken = core.getInput("github-token", { required: true });
   const vercelToken = core.getInput("vercel-token", { required: true });
   const projectId = core.getInput("project-id", { required: true });
   const teamId = core.getInput("team-id");
   const searchRetries = parseInt(core.getInput("search-retries"), 10) || 3;
   const readyRetries = parseInt(core.getInput("ready-retries"), 10) || 10;
+
+  const octokit = new Octokit({ auth: githubToken });
+  const [owner, repo] = process.env.GITHUB_REPOSITORY.split("/");
 
   async function api(path) {
     const res = await fetch(`https://api.vercel.com${path}`, {
@@ -33,12 +38,10 @@ async function main() {
 
   async function findLatestDeployment(commitSha, retries) {
     if (typeof retries !== "number" || retries <= 0) {
-      throw new Error(
-        `Could not find any Vercel deployments for the commit with SHA ${commitSha}.`
-      );
+      return null;
     }
 
-    console.log("Searching for deployments related to this commit.");
+    console.log(`Searching for deployments related to commit ${commitSha}.`);
     const { deployments } = await api(
       `/v5/now/deployments?${
         teamId ? `teamId=${teamId}&` : ""
@@ -62,6 +65,35 @@ async function main() {
     );
     await wait(DEPLOYMENT_SEARCH_INTERVAL);
     return findLatestDeployment(commitSha, retries - 1);
+  }
+
+  async function findDeployment(commitSha, numberOfRecursiveCalls) {
+    const deployment = await findLatestDeployment(
+      commitSha,
+      numberOfRecursiveCalls === 0 ? searchRetries : 1
+    );
+
+    if (deployment) {
+      return deployment;
+    }
+
+    try {
+      const commit = await octokit.repos.getCommit({
+        owner,
+        repo,
+        ref: commitSha,
+      });
+      if (commit.data.parents[1]) {
+        return findDeployment(
+          commit.data.parents[1].sha,
+          numberOfRecursiveCalls + 1
+        );
+      }
+      return null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 
   async function waitForDeploymentToBeReady(deployment, retries) {
@@ -93,7 +125,14 @@ async function main() {
   }
 
   const commitSha = process.env.GITHUB_SHA;
-  const deployment = await findLatestDeployment(commitSha, searchRetries);
+
+  const deployment = await findDeployment(commitSha, 0);
+  if (!deployment) {
+    throw new Error(
+      `Could not find any Vercel deployments for the commit with SHA ${commitSha}.`
+    );
+  }
+
   const readyDeployment = await waitForDeploymentToBeReady(
     deployment,
     readyRetries

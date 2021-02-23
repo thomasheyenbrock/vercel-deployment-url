@@ -4,6 +4,10 @@ This repository contains a GitHub action that uses the Vercel API to find the la
 
 ## Inputs
 
+### `github-token`
+
+**Required** A token to authenticate requests sent to the GitHub API. You can use the one that is [automatically added](https://docs.github.com/en/actions/reference/authentication-in-a-workflow) to your workflow run.
+
 ### `vercel-token`
 
 **Required** A token to authenticate requests sent to the Vercel API. You can create one [here](https://vercel.com/account/tokens).
@@ -35,8 +39,9 @@ The URL of the Vercel preview deployment in a `READY` state.
 ```yml
 - name: Get deployment URL
   id: deployment
-  uses: thomasheyenbrock/vercel-deployment-url@v1
+  uses: thomasheyenbrock/vercel-deployment-url@v2
   with:
+    github-token: ${{ secrets.GITHUB_TOKEN }}
     vercel-token: ${{ secrets.VERCEL_TOKEN }}
     project-id: ${{ secrets.VERCEL_PROjECT_ID }}
 ```
@@ -44,7 +49,6 @@ The URL of the Vercel preview deployment in a `READY` state.
 ## Notes
 
 - The action automatically uses the commit SHA that it runs on to find related Vercel deployments (using [deployment metadata](https://vercel.com/blog/deployment-metadata)). If there are multiple deployments for a single SHA the latest one is taken.
-- This action will fail if...
-  - ...it can't find any Vercel deployment related to the current commit after the specified number of retries.
-  - ...the latest Vercel deployment for the current commit is not ready after the specified number of retries.
-  - ...the Vercel deployment fails.
+- This action will fail if the Vercel deployment fails or takes too long to complete.
+- This action will fail if no Vercel deployment can be found for the latest commit.
+- If the latest commit is a merge commit, deployments for previous commits will also be searched recursively. This avoids not finding any deployment due to Vercels deduplication.

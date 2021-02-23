@@ -1,6 +1,9 @@
 name: "Get Vercel deployment"
 description: "Gets the URL of the preview deployment on Vercel for the current commit"
 inputs:
+  github-token:
+    description: "A token that allows access to the GitHub-API"
+    required: true
   vercel-token:
     description: "A token that allows access to the Vercel-API"
     required: true

@@ -1,6 +1,6 @@
 {
   "name": "vercel-deployment-url",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A GitHub action to get the URL of the a Vercel preview deployment for a given commit",
   "main": "dist/index.js",
   "author": "Thomas Heyenbrock",
@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.6",
+    "@octokit/rest": "^18.2.0",
     "node-fetch": "^2.6.1"
   },
   "devDependencies": {
