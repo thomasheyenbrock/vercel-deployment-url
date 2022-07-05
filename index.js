@@ -5,7 +5,7 @@ const fetch = require("node-fetch");
 const DEPLOYMENT_SEARCH_INTERVAL = 5;
 const DEPLOYMENT_READY_INTERVAL = 30;
 
-async function wait(s) {
+function wait(s) {
   return new Promise((resolve) => setTimeout(resolve, s * 1000));
 }
 
@@ -110,7 +110,7 @@ async function main() {
         throw new Error("The Vercel deployment did not succeed.");
       case "QUEUED":
       case "BUILDING":
-      default:
+      default: {
         console.log(
           `The latest deployment is still in the '${deployment.readyState}' state, waiting for ${DEPLOYMENT_READY_INTERVAL} more seconds (${retries} retries remaining)`
         );
@@ -121,6 +121,7 @@ async function main() {
           }`
         );
         return waitForDeploymentToBeReady(updatedDeployment, retries - 1);
+      }
     }
   }
 
