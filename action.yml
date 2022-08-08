@@ -1,12 +1,6 @@
 name: "Get Vercel deployment"
 description: "Gets the URL of the preview deployment on Vercel for the current commit"
 inputs:
-  github-token:
-    description: "A token that allows access to the GitHub-API"
-    required: true
-  vercel-token:
-    description: "A token that allows access to the Vercel-API"
-    required: true
   project-id:
     description: "The identifier for your Vercel project"
     required: true
@@ -25,5 +19,5 @@ outputs:
   url:
     description: "The URL of the vercel preview deployment"
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"

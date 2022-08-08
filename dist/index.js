@@ -271,8 +271,19 @@ function wait(s) {
 }
 
 async function main() {
-  const githubToken = core.getInput("github-token", { required: true });
-  const vercelToken = core.getInput("vercel-token", { required: true });
+  const githubToken = process.env.GITHUB_TOKEN;
+  if (!githubToken) {
+    throw new Error(
+      "This action needs a GitHub token, you need to set the env `GITHUB_TOKEN`"
+    );
+  }
+  const vercelToken = process.env.VERCEL_TOKEN;
+  if (!vercelToken) {
+    throw new Error(
+      "This action needs a Vercel token, you need to set the env `VERCEL_TOKEN`"
+    );
+  }
+
   const projectId = core.getInput("project-id", { required: true });
   const teamId = core.getInput("team-id");
   const searchRetries = parseInt(core.getInput("search-retries"), 10) || 3;
