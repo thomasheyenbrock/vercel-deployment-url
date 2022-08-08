@@ -2,15 +2,17 @@
 
 This repository contains a GitHub action that uses the Vercel API to find the latest deployment for the current commit. It waits for the deployment to be done and then outputs the URL.
 
-## Inputs
+## Envs
 
-### `github-token`
+### `GITHUB_TOKEN`
 
 **Required** A token to authenticate requests sent to the GitHub API. You can use the one that is [automatically added](https://docs.github.com/en/actions/reference/authentication-in-a-workflow) to your workflow run.
 
-### `vercel-token`
+### `VERCEL_TOKEN`
 
 **Required** A token to authenticate requests sent to the Vercel API. You can create one [here](https://vercel.com/account/tokens).
+
+## Inputs
 
 ### `project-id`
 
@@ -40,9 +42,10 @@ The URL of the Vercel preview deployment in a `READY` state.
 - name: Get deployment URL
   id: deployment
   uses: thomasheyenbrock/vercel-deployment-url@v2
+  env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   with:
-    github-token: ${{ secrets.GITHUB_TOKEN }}
-    vercel-token: ${{ secrets.VERCEL_TOKEN }}
     project-id: ${{ secrets.VERCEL_PROjECT_ID }}
 ```
 
